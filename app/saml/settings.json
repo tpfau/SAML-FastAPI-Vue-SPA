@@ -1,0 +1,33 @@
+{
+    "strict": true,
+    "debug": true,
+
+    "sp": {        
+        "entityId": "http://127.0.0.1:3000/saml/metadata",
+        "assertionConsumerService": {            
+            "url": "http://127.0.0.1:3000/saml/acs",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+        },        
+        "singleLogoutService": {            
+            "url": "http://127.0.0.1:3000/saml/sls",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        },
+        "NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+        "x509cert": "",
+        "privateKey": ""
+    },
+    
+    "idp" : {
+        "entityId" : "http://127.0.0.1:8081/auth/realms/test",
+        "singleSignOnService": {
+            "url" : "http://127.0.0.1:8081/auth/realms/test/protocol/saml",
+            "binding" : "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" 
+        },
+        "singleLogoutService": {
+            "binding":"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
+            "url" :"http://127.0.0.1:8081/auth/realms/test/protocol/saml"
+        },
+        "x509cert": "MIIClzCCAX8CBgGM8hhdojANBgkqhkiG9w0BAQsFADAPMQ0wCwYDVQQDDAR0ZXN0MB4XDTI0MDExMDA2MzcxMloXDTM0MDExMDA2Mzg1MlowDzENMAsGA1UEAwwEdGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAIVzwc1rijxMeOgMmTOr4GlaRnVxN4XFQYejCR/OmEdenyvXYANBoejJJsFckUgrRcWu1CoFPTXyXAffS/zntKA40NqdHTxcJZT5Q/NbaCgOUqoVsRuFXU+AQENMwH7AQk3d2sd7J10F3oV8SJ6BgxWBgZeQX88HvP1Z5uNnF+gWLD3h8lAj7lhiAJxpkEhpOyCakWLyDc2E5aXcc6ddFLQbw7XiYk5k2/43FCxPrPTPmGEIE29G0yXS97W7gHs43mXOHEeFq85PaQX3ejcMfMa3IUMLlePx02ZBl4mR6hwdTRpdx4OgVPs/vu+fuuQHFvN8GD2+btttOkIib/JX6bECAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAZBgAl6ZsExvZbNeurXDGNILkZfub17LriZDj8OI2LnIN0Mqi9RIcUDPsJ3pwbYmjwDSw1ZXudxA6/HEWB02MntuBmVHIV8o3ZUpNIIkCB8KMHFlXkNiQP+ZpMihQAklu9MWbEBoKVEvUSMTuCIQjmPgo0jg8p5aGUpiQ6dxFFyr/I9J6Zj3VHuXsu8qPn2KfCiPErHhgPh8ceYOUviTLrNvmaDONSVvjWWvjGPXuT3j/efsjLjs4LO0Yor0THQTPabwLOPRjBSmsYmo05d4R5IF+tCw3MN+5gEDAj/pttsIssek057JtYOpaZKwHxNYD5fy1F/0C2BQJY/fCjxxZKQ=="
+    
+    }   
+}
