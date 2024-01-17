@@ -19,6 +19,7 @@ This is a basic Backed-frontend split for an application using vue as front-end 
 ### Create certificates
 
 ```
+mkdir app/saml/certs
 cd app/saml/certs
 openssl req -new -x509 -days 3652 -nodes -out sp.crt -keyout sp.key
 ```
