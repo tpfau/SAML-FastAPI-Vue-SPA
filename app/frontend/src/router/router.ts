@@ -11,8 +11,11 @@ const routes = [
     name: 'login',
     path: '/login',
     redirect: (to: RouteLocationNormalized) => {
+      console.log('rerouting to login')
+      const authStore = useAuthStore()
+      authStore.rerouting = true
       window.location.href = 'http://127.0.0.1:3000/saml/login'
-      return { path: '/saml/login' }
+      return { path: '' }
     }
   }
 ]
@@ -24,14 +27,15 @@ export const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  console.log('Updating route')
   // redirect to login page if not logged in and trying to access a restricted page
   const authStore = useAuthStore()
-  if (!authStore.loggedIn && to.name !== 'login') {
+  if (!authStore.loggedIn && to.name !== 'login' && !authStore.rerouting) {
+    console.log('Updating route')
     const token = to.query.token
     if (!token) {
       return { name: 'login' }
     } else {
+      authStore.login(token.toString())
     }
   }
 })
