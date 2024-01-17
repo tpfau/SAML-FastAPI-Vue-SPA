@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/authStore'
 import ProgressSpinner from 'primevue/progressspinner'
+import Button from 'primevue/button'
 const authStore = useAuthStore()
 </script>
 
@@ -12,7 +13,6 @@ const authStore = useAuthStore()
       <!-- specify the link by passing the `to` prop. -->
       <!-- `<router-link>` will render an `<a>` tag with the correct `href` attribute -->
       <router-link to="/">Go to Home</router-link>
-      <router-link to="/login">Go to Login</router-link>
     </p>
     <!-- route outlet -->
     <!-- component matched by the route will render here -->

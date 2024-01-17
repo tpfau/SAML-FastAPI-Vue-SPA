@@ -35,7 +35,8 @@ router.beforeEach(async (to) => {
     if (!token) {
       return { name: 'login' }
     } else {
-      authStore.login(token.toString())
+      await authStore.login(token.toString())
+      router.replace('/')
     }
   }
 })
