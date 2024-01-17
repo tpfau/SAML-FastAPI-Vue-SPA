@@ -8,7 +8,7 @@ from jose import JWTError, jwt
 from pydantic import BaseModel
 
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 5
+ACCESS_TOKEN_EXPIRE_MINUTES = 2
 ALGORITHM = "HS256"
 SECRET_KEY = "SomeSecret"
 api_key_header = APIKeyHeader(name="Authorization")
@@ -47,16 +47,19 @@ async def get_authed_user(api_key_header: str = Security(api_key_header)) -> Use
         try:
             # This should get the token
             token = api_key_header.split(" ", 1)[1]
-            try:
-                user = await get_current_user(token)
-                return user
-            except Exception as e:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail=str(e),
-                    headers={"Authorization": "Bearer"},
-                )
-        except:
+            user = await get_current_user(token)
+            return user
+        except JWTError as e:
+            print("got a JWT error")
+            print(e)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=str(e),
+                headers={"Authorization": "Bearer"},
+            )
+        except Exception as e:
+            print("got a different error")
+            print(e)
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Invalid Authorization header.",
@@ -94,26 +97,13 @@ async def get_current_user(token: str) -> User:
         detail="Could not validate credentials",
         headers={"Authorization": "Bearer"},
     )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        expTime = datetime.utcfromtimestamp(payload.get("exp"))
-        if datetime.utcnow() > expTime:
-            print("Token no longer valid")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token no longer valid",
-                headers={"Authorization": "Bearer"},
-            )
-        user: User = User(username=payload.get("user"), attributes=payload)
-        print(user)
-        if user.username is None:
-            raise credentials_exception
-    except JWTError as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e),
-            headers={"Authorization": "Bearer"},
-        )
+    # This does also check the expiration time stamp...
+    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    user: User = User(username=payload.get("user"), attributes=payload)
+    print(user)
+    if user.username is None:
+        raise credentials_exception
+
     if user.username is None:
         raise credentials_exception
     print("Returning user")
