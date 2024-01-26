@@ -1,0 +1,5 @@
+#!/bin/bash
+export MONGOHOST=localhost
+export MONGOUSER=Admin
+export MONGOPASSWORD=6379
+export MONGO_SESSION_COLLECTION=sessions

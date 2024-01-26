@@ -5,7 +5,12 @@ from fastapi import FastAPI, Request, Response, Security
 from security.saml import prepare_from_fastapi_request, saml_settings
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from starlette.responses import RedirectResponse
+from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.authentication import AuthenticationMiddleware
+from security.session import SessionHandler
+from security.auth import SAMLSessionBackend
 import starlette.status as status
+
 from security.jwt import (
     create_access_token,
     get_current_user,
@@ -20,11 +25,25 @@ import logging
 # Debugging imports
 import traceback
 
-
+session_handler = SessionHandler()
 app = FastAPI()
+app.add_middleware(SessionMiddleware, secret_key="some-random-string", max_age=None)
+app.add_middleware(AuthenticationMiddleware, backend=SAMLSessionBackend)
+
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG
 )
+
+
+@app.middleware("http")
+async def logger_middleware(request: Request, call_next):
+    path = request.url.path
+    method = request.method
+    log_message = f"Received request: {method} {path}"
+    logging.info(log_message)
+    logging.info(request.headers)
+    response = await call_next(request)
+    return response
 
 
 @app.middleware("http")
@@ -43,23 +62,8 @@ async def auth_test(request: Request):
     # Obtain the auth manually here, because we want to provide
     # Information about the authentication status, and using security would make this fail with Unauthorized
     # Responses...
-    bearer = request.headers.get("Authorization")
-    if bearer != None:
-        try:
-            # This should get the token
-            token = bearer.split(" ", 1)[1]
-            try:
-                user = await get_current_user(token)
-                return {"authed": True, "user": user.username}
-            except Exception as e:
-                print(e)
-                traceback.print_exc()
-                return {"authed": False, "reason": str(e)}
-        except:
-            return {
-                "authed": False,
-                "reason": "Invalid Authorization Header, must be 'Bearer tokendata' ",
-            }
+    if request.user.is_authenticated:
+        return {"authed": True, "user": request.user.username}
     else:
         return {"authed": False, "reason": "No Token provided"}
 
@@ -89,10 +93,16 @@ async def saml_callback(request: Request):
             # This check if the response was ok and the user data retrieved or not (user authenticated)
             return "User Not authenticated"
         else:
-            userdata = auth.get_attributes().copy()
-            userdata["user"] = auth.get_nameid()
-            tokenDic = {"token": create_access_token(userdata)}
-            forwardAddress = f"/?{urlencode(tokenDic)}"
+            sessionData = {}
+            sessionData["samlUserdata"] = auth.get_attributes()
+            sessionData["samlNameId"] = auth.get_nameid()
+            sessionData["samlNameIdFormat"] = auth.get_nameid_format()
+            sessionData["samlNameIdNameQualifier"] = auth.get_nameid_nq()
+            sessionData["samlNameIdSPNameQualifier"] = auth.get_nameid_spnq()
+            sessionData["samlSessionIndex"] = auth.get_session_index()
+            session_key = session_handler.create_session(sessionData)
+            req.session["key"] = session_key
+            forwardAddress = f"/"
             return RedirectResponse(
                 url=forwardAddress, status_code=status.HTTP_303_SEE_OTHER
             )

@@ -195,3 +195,6 @@ app/saml/certs/*
 
 # MySQL database
 data/**/*
+
+# Mongo DB
+mongodb/**/*
