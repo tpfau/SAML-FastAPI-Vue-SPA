@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/authStore'
 import ProgressSpinner from 'primevue/progressspinner'
 import Button from 'primevue/button'
 const authStore = useAuthStore()
+authStore.login('testtoken')
 </script>
 
 <template>
@@ -19,7 +20,9 @@ const authStore = useAuthStore()
     <router-view></router-view>
   </div>
   <div v-else>
-    <progress-spinner></progress-spinner>
+    <router-link to="/login">
+      <Button>Login</Button>
+    </router-link>
   </div>
 </template>
 

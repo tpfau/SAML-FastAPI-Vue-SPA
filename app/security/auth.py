@@ -8,6 +8,7 @@ from starlette.authentication import (
 )
 from starlette.middleware import Middleware
 from .session import SessionHandler
+from fastapi import HTTPException, status
 
 
 class SAMLUser(SimpleUser):
@@ -29,8 +30,21 @@ class SAMLSessionBackend(AuthenticationBackend):
                 return
         except AssertionError:
             return
+
         # check for authentication:
         if not "key" in conn.session:
             return
-        data = self.session_handler.get_session_data(conn.session["key"])
-        return AuthCredentials(["authenticated"]), SAMLUser(data["username"], data)
+        try:
+            data = self.session_handler.get_session_data(conn.session["key"])
+            if data == None:
+                # This is not a valid session any more... so we need to reset it somehow.
+                clean_session(conn.session)
+                return
+        except HTTPException:
+            return
+        return AuthCredentials(["authenticated"]), SAMLUser(data["samlNameId"], data)
+
+
+def clean_session(session):
+    session.pop("key")
+    session["invalid"] = True
