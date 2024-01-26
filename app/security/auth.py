@@ -24,7 +24,10 @@ class SAMLSessionBackend(AuthenticationBackend):
         self.session_handler = session_handler
 
     async def authenticate(self, conn):
-        if conn.session == None:
+        try:
+            if conn.session == None:
+                return
+        except AssertionError:
             return
         # check for authentication:
         if not "key" in conn.session:

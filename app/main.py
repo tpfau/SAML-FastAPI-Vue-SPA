@@ -27,8 +27,13 @@ import traceback
 
 session_handler = SessionHandler()
 app = FastAPI()
+
+app.add_middleware(
+    AuthenticationMiddleware, backend=SAMLSessionBackend(session_handler)
+)
+
 app.add_middleware(SessionMiddleware, secret_key="some-random-string", max_age=None)
-app.add_middleware(AuthenticationMiddleware, backend=SAMLSessionBackend)
+
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG
