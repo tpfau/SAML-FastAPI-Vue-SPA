@@ -30,23 +30,64 @@ Enter the details requested
 
 Refer to the following repository README.md for running Keycloak using docker-compose and setting up a SAML2 client on Keycloak
 
-https://github.com/ais-one/vue-crud-x/tree/master/docker-devenv/keycloak
+The following is adapted from the readme on this repo:
+https://github.com/ais-one/cookbook/tree/main/docker-devenv/keycloak
 
-**Note:**
+**Instructions**
 
-- please follow the names used, e.g. realm is test (appears as Test on Keycloak UI) if not there could be configuration problems
-- Ignore the section on SAML Step 7 as it is already setup, except replace the cert ("x509cert" in main.py) with the cert generated in the Keycloak Realm that you created (see **Realm Settings -> Keys** on Keycloak admin UI)
-- Ignore the section on OIDC setup
-- Client specifications:
-  - In addition to the steps mentioned in the setup you will need to set the following settings in the Client:
-    - Clients -> "Your Client" -> Settings -> Encrypt Assertions -> ON
-    - Clients -> "Your Client" -> Settings -> Sign Assertions -> ON
-    - Clients -> "Your Client" -> SAML Keys -> Signing key -> import
-      - Archive Format -> Certificate Pem
-      - Select File -> Select your geerated sp.crt file
-    - Clients -> "Your Client" -> SAML Keys -> SignEncryption Key -> import
-      - Archive Format -> Certificate Pem
-      - Select File -> Select your geerated sp.crt file
+#### Login
+
+URL: http://127.0.0.1:8081/
+Administrayopm Console
+
+- Username: admin
+- password: admin
+
+#### Keycloak Setup:
+
+** Realm creation **
+
+- top left (master) -> create Realm
+  - Realm name : test
+
+** Obtain realm Certificate **
+
+- Configure(left menu) -> Realm Settings -> Endpoints - SAML 2.0 .. Metadata
+  - copy `<ds:x509Certificate>` tab data
+  - paste the data under the project folders `app/saml/settings.json` replacing the `idp -> x509cert` field
+
+** Set up a client **
+
+- Start the app:
+  ```
+    cd app
+    gunicorn main:app --bind 0.0.0.0:3000 -k uvicorn.workers.UvicornWorker --workers 1
+  ```
+- go to "127.0.0.1:3000/saml/metadata"
+- save the file as metadata.xml
+- In the keycloak administration console:
+  - Manage (left Menu) -> Clients -> Import Client -> Browse
+  - select the metadata file you created
+
+** Configure the client **
+
+- Manage (left menu) -> Client Scopes -> role_list -> Mappers -> role_list
+  - Activate "single role attribute"
+  - Save
+- Manage -> Clients -> Roles -> Create Role
+  - Role Name : User -> Save
+
+** Create a user **
+
+- Manage (left Menu) -> Users -> Add User
+  - UserName : test-user
+  - Create
+- Manage (left Menu) -> Users -> test-user -> Credentials -> Add Password
+  - (select a password), deactivate temporary
+- Manage (left Menu) -> Users -> test-user -> Role Mapping -> Assign role -> Filter By Clients
+  - Select the User role created before
+
+This should be it
 
 ## SAML Sample Application Installation
 

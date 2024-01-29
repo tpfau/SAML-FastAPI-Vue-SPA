@@ -27,4 +27,7 @@ async function loadData() {
     <div v-for="(element, key) of userData">{{ key }} : {{ element }}</div>
   </div>
   <Button @click="loadData">Load Data</Button>
+  <router-link to="/logout">
+    <Button>Log out</Button>
+  </router-link>
 </template>

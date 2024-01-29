@@ -16,17 +16,16 @@ async def prepare_from_fastapi_request(request: Request, debug=False):
         "http_host": request.url.hostname,
         "server_port": request.url.port,
         "script_name": request.url.path,
+        # Need to find the correct way to do this...
         "post_data": {},
-        "get_data": {},
+        "get_data": dict(request.query_params),
         # Advanced request options
         # "https": ""  # Uncomment if you are running a server using https!
         # "request_uri": "",
-        # "query_string": "",
+        "query_string": request.url.query,
         # "validate_signature_from_qs": False,
         # "lowercase_urlencoding": False
     }
-    if request.query_params:
-        rv["get_data"] = (request.query_params,)
     form_data = await request.form()
     if "SAMLResponse" in form_data:
         SAMLResponse = form_data["SAMLResponse"]
